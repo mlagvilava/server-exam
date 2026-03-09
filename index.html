@@ -1,0 +1,2059 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Windows Server 2022 — სრული გზამკვლევი</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Noto+Sans+Georgian:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:           #f0f4f8;
+  --white:        #ffffff;
+  --surface:      #e8edf4;
+  --border:       #d1d9e6;
+  --border-md:    #b8c4d8;
+
+  --blue:         #2563eb;
+  --blue-light:   #eff6ff;
+  --blue-mid:     #bfdbfe;
+  --blue-dark:    #1e40af;
+  --blue-xlight:  #f8fbff;
+
+  --green:        #059669;
+  --green-light:  #ecfdf5;
+  --green-mid:    #6ee7b7;
+  --green-dark:   #065f46;
+
+  --orange:       #d97706;
+  --orange-light: #fffbeb;
+  --orange-mid:   #fcd34d;
+  --orange-dark:  #92400e;
+
+  --red:          #dc2626;
+  --red-light:    #fef2f2;
+  --red-mid:      #fca5a5;
+
+  --purple:       #7c3aed;
+  --purple-light: #f5f3ff;
+  --purple-mid:   #c4b5fd;
+
+  --text:         #0f172a;
+  --text-med:     #334155;
+  --text-light:   #64748b;
+  --text-xlight:  #94a3b8;
+
+  --shadow-sm:  0 1px 4px rgba(15,23,42,0.07), 0 1px 2px rgba(15,23,42,0.04);
+  --shadow-md:  0 4px 20px rgba(15,23,42,0.09), 0 2px 6px rgba(15,23,42,0.05);
+  --shadow-lg:  0 8px 32px rgba(15,23,42,0.11), 0 3px 10px rgba(15,23,42,0.06);
+
+  --r-sm: 8px;
+  --r:    12px;
+  --r-lg: 18px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'Noto Sans Georgian', 'Plus Jakarta Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14.5px;
+  line-height: 1.65;
+}
+
+/* ══════════ TOPBAR ══════════ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 300;
+  height: 62px;
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20px);
+  border-bottom: 1.5px solid var(--border);
+  display: flex; align-items: center;
+  padding: 0 28px; gap: 14px;
+  box-shadow: var(--shadow-sm);
+}
+.logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none; flex-shrink: 0;
+}
+.logo-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.logo-text { font-weight: 800; font-size: 15px; color: var(--blue-dark); line-height: 1.2; }
+.logo-text span { display: block; font-size: 10px; font-weight: 600; color: var(--text-light); letter-spacing: 0.06em; }
+.topbar-sep { width: 1px; height: 24px; background: var(--border); }
+.topbar-sub { font-size: 13px; color: var(--text-light); font-weight: 500; }
+.topbar-nav { margin-left: auto; display: flex; gap: 6px; }
+.topbar-nav a {
+  font-size: 12px; font-weight: 700; padding: 6px 14px;
+  border-radius: 20px; text-decoration: none; transition: all 0.15s;
+  border: 1.5px solid transparent;
+}
+.tn1 { background: var(--blue-light); color: var(--blue); border-color: var(--blue-mid); }
+.tn1:hover { background: #dbeafe; }
+.tn2 { background: var(--green-light); color: var(--green); border-color: var(--green-mid); }
+.tn2:hover { background: #d1fae5; }
+.tn3 { background: var(--purple-light); color: var(--purple); border-color: var(--purple-mid); }
+.tn3:hover { background: #ede9fe; }
+
+.progress-wrap { position: fixed; top: 62px; left: 0; right: 0; z-index: 299; height: 3px; background: var(--border); }
+.progress-bar { height: 100%; width: 0%; background: linear-gradient(90deg, var(--blue), var(--green)); transition: width 0.12s; }
+
+/* ══════════ LAYOUT ══════════ */
+.layout { display: flex; padding-top: 65px; min-height: 100vh; }
+
+/* ══════════ SIDEBAR ══════════ */
+.sidebar {
+  width: 268px; flex-shrink: 0;
+  position: fixed; top: 65px; left: 0; bottom: 0;
+  background: var(--white);
+  border-right: 1.5px solid var(--border);
+  overflow-y: auto; padding: 16px 0 40px;
+}
+.sidebar::-webkit-scrollbar { width: 3px; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+.sb-part {
+  padding: 14px 16px 4px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  display: flex; align-items: center; gap: 7px;
+}
+.sb-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.sb-link {
+  display: flex; align-items: flex-start; gap: 8px;
+  padding: 6px 16px 6px 30px;
+  text-decoration: none; font-size: 13px; font-weight: 500;
+  color: var(--text-light); border-left: 2px solid transparent;
+  transition: all 0.12s; line-height: 1.45;
+}
+.sb-link:hover { color: var(--blue); background: var(--blue-xlight); border-left-color: var(--blue-mid); }
+.sb-link.active { color: var(--blue-dark); background: var(--blue-light); border-left-color: var(--blue); font-weight: 600; }
+.sb-badge {
+  width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0;
+  font-size: 10px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; margin-top: 1px;
+}
+.sb-b1 { background: #dbeafe; color: var(--blue); }
+.sb-b2 { background: #d1fae5; color: var(--green); }
+.sb-b3 { background: #ede9fe; color: var(--purple); }
+.sb-div { height: 1px; background: var(--border); margin: 10px 16px; }
+
+/* ══════════ MAIN ══════════ */
+.main { margin-left: 268px; flex: 1; padding: 36px 48px 120px; max-width: 980px; }
+
+/* ══════════ HERO ══════════ */
+.hero {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); padding: 40px 44px;
+  margin-bottom: 40px; position: relative; overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+.hero::before {
+  content: '';
+  position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--blue) 0%, #06b6d4 50%, var(--green) 100%);
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--blue-light); color: var(--blue-dark);
+  font-size: 11px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 20px; margin-bottom: 14px;
+  border: 1px solid var(--blue-mid);
+}
+.hero h1 { font-size: 28px; font-weight: 800; line-height: 1.25; color: var(--text); margin-bottom: 8px; }
+.hero h1 em { font-style: normal; color: var(--blue); }
+.hero-sub { font-size: 14.5px; color: var(--text-light); line-height: 1.6; max-width: 580px; }
+.hero-chips { display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap; }
+.chip { display: flex; align-items: center; gap: 6px; padding: 7px 16px; border-radius: 20px; font-size: 12.5px; font-weight: 700; border: 1.5px solid; }
+.ch1 { background: var(--blue-light); color: var(--blue-dark); border-color: var(--blue-mid); }
+.ch2 { background: var(--green-light); color: var(--green-dark); border-color: var(--green-mid); }
+.ch3 { background: var(--purple-light); color: var(--purple); border-color: var(--purple-mid); }
+.hero-warn {
+  margin-top: 20px; padding: 12px 16px;
+  background: var(--orange-light); border: 1.5px solid var(--orange-mid);
+  border-radius: var(--r-sm); font-size: 13px; color: var(--orange-dark); font-weight: 600;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ══════════ PART HEADER ══════════ */
+.part-header {
+  display: flex; align-items: center; gap: 14px;
+  margin: 52px 0 26px; padding-bottom: 18px;
+  border-bottom: 2px solid var(--border);
+}
+.part-pill {
+  font-size: 11px; font-weight: 800; padding: 5px 14px;
+  border-radius: 20px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap;
+}
+.pp1 { background: var(--blue-light); color: var(--blue-dark); border: 1.5px solid var(--blue-mid); }
+.pp2 { background: var(--green-light); color: var(--green-dark); border: 1.5px solid var(--green-mid); }
+.pp3 { background: var(--purple-light); color: var(--purple); border: 1.5px solid var(--purple-mid); }
+.part-header h2 { font-size: 21px; font-weight: 800; color: var(--text); }
+
+/* ══════════ STEP CARD ══════════ */
+.step {
+  background: var(--white); border: 1.5px solid var(--border);
+  border-radius: var(--r-lg); margin-bottom: 22px;
+  box-shadow: var(--shadow-sm); overflow: hidden;
+  transition: box-shadow 0.18s;
+}
+.step:hover { box-shadow: var(--shadow-md); }
+
+.step-hd {
+  display: flex; align-items: center; gap: 14px;
+  padding: 18px 24px; border-bottom: 1px solid var(--border);
+  background: linear-gradient(to right, var(--bg), var(--white));
+}
+.step-icon {
+  width: 42px; height: 42px; border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 800; font-family: 'JetBrains Mono', monospace;
+  flex-shrink: 0; letter-spacing: -0.05em;
+}
+.ic1 { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: var(--blue-dark); }
+.ic2 { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: var(--green-dark); }
+.ic3 { background: linear-gradient(135deg, #ede9fe, #c4b5fd); color: var(--purple); }
+
+.step-hd-info { flex: 1; }
+.step-hd h3 { font-size: 15.5px; font-weight: 800; color: var(--text); margin-bottom: 2px; line-height: 1.3; }
+.step-hd-meta { font-size: 12px; color: var(--text-xlight); font-weight: 500; }
+.scr-pill {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--orange-light); border: 1.5px solid var(--orange-mid);
+  color: var(--orange-dark); font-size: 11px; font-weight: 700;
+  padding: 4px 10px; border-radius: 20px; white-space: nowrap; flex-shrink: 0;
+}
+
+.step-body { padding: 26px; }
+
+/* ══════════ MICRO STEP ══════════ */
+.ms { margin-bottom: 22px; padding-bottom: 22px; border-bottom: 1.5px dashed var(--border); }
+.ms:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+
+.ms-title {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin-bottom: 12px;
+}
+.ms-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  font-size: 12px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 0px;
+}
+.mn1 { background: var(--blue); color: white; }
+.mn2 { background: var(--green); color: white; }
+.mn3 { background: var(--purple); color: white; }
+.ms-title strong { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.4; }
+
+/* ══════════ ACTIONS ══════════ */
+.actions { display: flex; flex-direction: column; gap: 6px; margin: 8px 0; }
+.act {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--r-sm); font-size: 13.5px; line-height: 1.55;
+  transition: background 0.1s;
+}
+.act:hover { background: var(--blue-xlight); border-color: var(--blue-mid); }
+.act-arrow { color: var(--blue); flex-shrink: 0; margin-top: 2px; font-size: 13px; font-weight: 700; }
+
+/* ══════════ CLICK BTN ══════════ */
+.kb {
+  display: inline-flex; align-items: center;
+  background: var(--white);
+  border: 1.5px solid #93c5fd;
+  border-bottom: 3px solid #93c5fd;
+  color: var(--blue-dark);
+  font-size: 12px; font-weight: 700;
+  padding: 2px 9px; border-radius: 5px;
+  white-space: nowrap; vertical-align: middle;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* ══════════ NAV PATH ══════════ */
+.np {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 2px;
+  padding: 10px 14px; margin: 8px 0;
+  background: #f8fbff; border: 1.5px solid var(--blue-mid);
+  border-radius: var(--r-sm); font-size: 13px; line-height: 1.7;
+}
+.np-seg { color: var(--text-med); font-weight: 500; }
+.np-arr { color: var(--text-xlight); margin: 0 5px; font-size: 12px; }
+.np-fin {
+  color: var(--blue-dark); font-weight: 800;
+  background: #dbeafe; padding: 1px 8px; border-radius: 4px;
+}
+
+/* ══════════ CODE ══════════ */
+code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px; font-weight: 600;
+  background: #eff6ff; border: 1px solid var(--blue-mid);
+  color: var(--blue-dark); padding: 1px 7px; border-radius: 4px;
+  white-space: nowrap;
+}
+.cmd-block {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px; color: #7dd3fc;
+  background: #0f172a; padding: 12px 16px;
+  border-radius: var(--r-sm); margin: 8px 0; display: block;
+}
+
+/* ══════════ CHECKLIST ══════════ */
+.cl { list-style: none; display: flex; flex-direction: column; gap: 5px; margin: 8px 0; }
+.cl li {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 9px 13px; background: var(--bg);
+  border: 1.5px solid var(--border); border-radius: var(--r-sm);
+  font-size: 13.5px; line-height: 1.5; cursor: pointer;
+  transition: all 0.12s; user-select: none;
+}
+.cl li:hover { background: var(--blue-light); border-color: var(--blue-mid); }
+.cl li.done { background: var(--green-light); border-color: var(--green-mid); }
+.cl li.done .cbx { background: var(--green); border-color: var(--green); }
+.cl li.done .cbx::after { opacity: 1; }
+.cl li.done span { color: var(--text-med); }
+.cbx {
+  width: 19px; height: 19px; border-radius: 5px;
+  border: 2px solid var(--border-md); background: var(--white);
+  flex-shrink: 0; margin-top: 1px; position: relative; transition: all 0.15s;
+}
+.cbx::after {
+  content: '✓'; position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 900; color: white; opacity: 0; transition: opacity 0.12s;
+}
+
+/* ══════════ NOTES ══════════ */
+.note {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 12px 16px; border-radius: var(--r-sm);
+  font-size: 13px; line-height: 1.6; margin: 10px 0;
+}
+.note-ico { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+.n-info { background: var(--blue-light); border: 1.5px solid var(--blue-mid); color: #1e3a8a; }
+.n-warn { background: var(--orange-light); border: 1.5px solid var(--orange-mid); color: var(--orange-dark); }
+.n-ok   { background: var(--green-light); border: 1.5px solid var(--green-mid); color: var(--green-dark); }
+.n-hot  { background: var(--red-light); border: 1.5px solid var(--red-mid); color: #991b1b; }
+
+/* ══════════ TABLE ══════════ */
+.tbl { overflow-x: auto; margin: 10px 0; border-radius: var(--r-sm); border: 1.5px solid var(--border); }
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+thead tr { background: var(--surface); }
+th { padding: 9px 14px; text-align: left; font-size: 11px; font-weight: 800; color: var(--text-light); letter-spacing: 0.07em; text-transform: uppercase; border-bottom: 1.5px solid var(--border); }
+td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: #fafbfd; }
+
+/* ══════════ RESULT BOX ══════════ */
+.result {
+  background: var(--green-light); border: 2px solid var(--green-mid);
+  border-radius: var(--r-sm); padding: 13px 18px;
+  font-size: 13.5px; color: var(--green-dark); font-weight: 700;
+  display: flex; align-items: center; gap: 10px; margin-top: 14px;
+}
+
+/* ══════════ SCREENSHOT PROMPT ══════════ */
+.scr {
+  background: linear-gradient(135deg, var(--orange-light), #fff7ed);
+  border: 2px solid var(--orange-mid); border-radius: var(--r-sm);
+  padding: 12px 16px; font-size: 13px; color: var(--orange-dark); font-weight: 600;
+  display: flex; align-items: center; gap: 8px; margin: 18px 0;
+}
+
+/* ══════════ VISUAL FOLDER TREE ══════════ */
+.ftree {
+  background: var(--white); border: 1.5px solid var(--blue-mid);
+  border-radius: var(--r); padding: 20px 20px 20px 16px;
+  margin: 12px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px;
+  box-shadow: var(--shadow-sm);
+}
+.ftree-row {
+  display: flex; align-items: center; gap: 0;
+  min-height: 34px; position: relative;
+}
+.ftree-spacer { width: 24px; flex-shrink: 0; position: relative; }
+.ftree-spacer.line::before {
+  content: ''; position: absolute; left: 11px; top: -16px; bottom: 0;
+  width: 1.5px; background: #c7d7f0;
+}
+.ftree-spacer.empty { }
+.ftree-connector {
+  width: 24px; flex-shrink: 0; position: relative; align-self: stretch;
+}
+.ftree-connector::before {
+  content: ''; position: absolute; left: 11px; top: 0; bottom: 50%;
+  width: 1.5px; background: #c7d7f0;
+}
+.ftree-connector::after {
+  content: ''; position: absolute; left: 11px; top: 50%; right: 0;
+  height: 1.5px; background: #c7d7f0;
+}
+.ftree-connector.last::before {
+  bottom: 50%;
+}
+.ftree-connector.last::after {
+  content: ''; position: absolute; left: 11px; top: 50%; right: 0;
+  height: 1.5px; background: #c7d7f0;
+}
+
+.ftree-item {
+  display: flex; align-items: center; gap: 7px;
+  padding: 5px 10px; border-radius: 7px;
+  transition: background 0.12s; flex: 1;
+}
+.ftree-item:hover { background: var(--blue-light); }
+.ftree-icon { font-size: 15px; flex-shrink: 0; }
+.ftree-name { font-weight: 600; color: var(--blue-dark); }
+.ftree-desc { font-size: 11.5px; color: var(--text-xlight); margin-left: 4px; font-family: 'Noto Sans Georgian', sans-serif; font-weight: 400; }
+
+/* Root row */
+.ftree-root {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 10px 12px; border-bottom: 1px dashed var(--border); margin-bottom: 6px;
+}
+.ftree-root .ftree-icon { font-size: 18px; }
+.ftree-root .ftree-name { font-size: 14px; color: var(--text); font-weight: 800; }
+
+/* Vertical line for children */
+.ftree-body { position: relative; }
+
+/* ══════════ SECTION LABEL ══════════ */
+.sec-lbl {
+  font-size: 10.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-xlight); margin: 18px 0 7px;
+}
+
+p { font-size: 14px; color: var(--text-med); line-height: 1.65; margin: 5px 0; }
+hr { border: none; border-top: 1px dashed var(--border); margin: 16px 0; }
+
+/* ══════════ RESPONSIVE ══════════ */
+@media (max-width: 860px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px 16px 80px; }
+  .topbar-nav { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- ████ TOPBAR ████ -->
+<header class="topbar">
+  <a class="logo" href="#">
+    <div class="logo-icon">
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="36" height="36" rx="8" fill="#1e40af"/>
+        <rect x="7" y="7" width="9.5" height="9.5" rx="1.5" fill="#60a5fa"/>
+        <rect x="19.5" y="7" width="9.5" height="9.5" rx="1.5" fill="#93c5fd"/>
+        <rect x="7" y="19.5" width="9.5" height="9.5" rx="1.5" fill="#93c5fd"/>
+        <rect x="19.5" y="19.5" width="9.5" height="9.5" rx="1.5" fill="#bfdbfe"/>
+      </svg>
+    </div>
+    <div class="logo-text">Windows Server 2022 <span>სრული ლაბორატორიული გზამკვლევი</span></div>
+  </a>
+  <div class="topbar-sep"></div>
+  <span class="topbar-sub">დამწყებისთვის · ნაბიჯ-ნაბიჯ</span>
+  <nav class="topbar-nav">
+    <a href="#part1" class="tn1">📦 ნაწილი 1</a>
+    <a href="#part2" class="tn2">⚙️ ნაწილი 2</a>
+    <a href="#part3" class="tn3">🗂 ნაწილი 3</a>
+  </nav>
+</header>
+<div class="progress-wrap"><div class="progress-bar" id="pbar"></div></div>
+
+<div class="layout">
+
+<!-- ████ SIDEBAR ████ -->
+<aside class="sidebar">
+  <div class="sb-part" style="color:var(--blue-dark)"><div class="sb-dot" style="background:var(--blue)"></div>ნაწილი 1 — ინსტალაცია</div>
+  <a class="sb-link" href="#s1-1"><div class="sb-badge sb-b1">1</div>დისკი + OS დაყენება</a>
+  <a class="sb-link" href="#s1-2"><div class="sb-badge sb-b1">2</div>AD DS, DHCP, DNS</a>
+  <a class="sb-link" href="#s1-3"><div class="sb-badge sb-b1">3</div>Server მომხმარებელი</a>
+  <a class="sb-link" href="#s1-4"><div class="sb-badge sb-b1">4</div>Domain Controller</a>
+  <div class="sb-div"></div>
+  <div class="sb-part" style="color:var(--green-dark)"><div class="sb-dot" style="background:var(--green)"></div>ნაწილი 2 — კონფიგურაცია</div>
+  <a class="sb-link" href="#s2-1"><div class="sb-badge sb-b2">1</div>DHCP — ორი Scope</a>
+  <a class="sb-link" href="#s2-2"><div class="sb-badge sb-b2">2</div>OU, ჯგუფები, Users</a>
+  <a class="sb-link" href="#s2-3"><div class="sb-badge sb-b2">3</div>File Server + FSRM</a>
+  <a class="sb-link" href="#s2-4"><div class="sb-badge sb-b2">4</div>GPO — Password Policy</a>
+  <a class="sb-link" href="#s2-5"><div class="sb-badge sb-b2">5</div>GPO — 9 შეზღუდვა</a>
+  <a class="sb-link" href="#s2-6"><div class="sb-badge sb-b2">6</div>Print Server</a>
+  <a class="sb-link" href="#s2-7"><div class="sb-badge sb-b2">7</div>Hyper-V</a>
+  <div class="sb-div"></div>
+  <div class="sb-part" style="color:var(--purple)"><div class="sb-dot" style="background:var(--purple)"></div>ნაწილი 3 — FTP & Teachers</div>
+  <a class="sb-link" href="#s3-1"><div class="sb-badge sb-b3">1</div>FTP OU + სერვერი</a>
+  <a class="sb-link" href="#s3-2"><div class="sb-badge sb-b3">2</div>Teachers OU</a>
+  <a class="sb-link" href="#s3-3"><div class="sb-badge sb-b3">3</div>Drive Map (L: / W:)</a>
+  <a class="sb-link" href="#s3-4"><div class="sb-badge sb-b3">4</div>Quota</a>
+  <a class="sb-link" href="#s3-5"><div class="sb-badge sb-b3">5</div>File Screening</a>
+  <a class="sb-link" href="#s3-6"><div class="sb-badge sb-b3">6</div>Folder Redirection</a>
+</aside>
+
+<!-- ████ MAIN ████ -->
+<main class="main">
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">📋 ლაბორატორიული სამუშაო · Windows Server 2022</div>
+  <h1>სრული ნაბიჯ-ნაბიჯ გზამკვლევი<br><em>დამწყებისთვის</em></h1>
+  <p class="hero-sub">ეს ინსტრუქცია ითვალისწინებს, რომ ამას პირველად აკეთებ. ყოველი ნაბიჯი ზუსტად გეუბნება — სად გადადი, რა ვინდოზი გახსნა, რა ველი შეავსე, რა ღილაკი დააჭირე. არ გჭირდება სხვა სახელმძღვანელო — მიყევი ამ ინსტრუქციას თანმიმდევრობით.</p>
+  <div class="hero-chips">
+    <div class="chip ch1">📦 ნაწილი 1 — ინსტალაცია</div>
+    <div class="chip ch2">⚙️ ნაწილი 2 — კონფიგურაცია</div>
+    <div class="chip ch3">🗂 ნაწილი 3 — FTP & Teachers</div>
+  </div>
+  <div class="hero-warn">📸 <strong>მნიშვნელოვანი:</strong> ყოველი ეტაპის შემდეგ გადაიღე სქრინშოტი — ეს დავალების სავალდებულო მოთხოვნაა!</div>
+</div>
+
+
+<!--===========================================
+    PART 1
+============================================-->
+<div class="part-header" id="part1">
+  <div class="part-pill pp1">ნაწილი 1</div>
+  <h2>Windows Server 2022-ის ინსტალაცია</h2>
+</div>
+
+
+<!-- ── S1-1 ── -->
+<div class="step" id="s1-1">
+  <div class="step-hd">
+    <div class="step-icon ic1">01</div>
+    <div class="step-hd-info">
+      <h3>დისკის დაყოფა C: და D: — Windows Server 2022 დაყენება</h3>
+      <div class="step-hd-meta">VMware / VirtualBox → ISO ფაილი → ინსტალაცია</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">1</div><strong>ვირტუალური მანქანის გამართვა</strong></div>
+      <p>სანამ დააყენებ, ვირტუალური მანქანა მომზადებული უნდა გქონდეს:</p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>გახსენი <strong>VMware Workstation</strong> ან <strong>VirtualBox</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>შექმენი ახალი ვირტუალური მანქანა → OS: <strong>Windows Server 2022</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>RAM: მინიმუმ <strong>4 GB</strong>; CPU: მინიმუმ <strong>2 core</strong>; Disk: მინიმუმ <strong>100 GB</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>CD/DVD Drive-ში: მიუთითე <strong>Windows Server 2022 ISO</strong> ფაილი</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გაუშვი მანქანა — რამდენიმე წამში გამოჩნდება ინსტალაციის ეკრანი</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">2</div><strong>ინსტალაციის პირველი ეკრანი</strong></div>
+      <div class="note n-info"><span class="note-ico">💡</span>ეკრანზე ნახავ Windows Setup ფანჯარას. ყველაფერი ინგლისურად იქნება — ეს ნორმალურია.</div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Language to install: <code>English (United States)</code> — ნუ შეცვლი</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Time and currency format: <code>English (United States)</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Keyboard: <code>US</code> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>დიდ ლურჯ ღილაკს ნახავ: <span class="kb">Install Now</span> → დააჭირე</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">3</div><strong>OS ვერსიის არჩევა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>სიაში ნახავ რამდენიმე ვარიანტს → აირჩიე: <strong>Windows Server 2022 Standard Evaluation (Desktop Experience)</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>License terms: ✅ მონიშნე „I accept the Microsoft Software License Terms" → <span class="kb">Next</span></span></div>
+      </div>
+      <div class="note n-info"><span class="note-ico">ℹ️</span><strong>Desktop Experience</strong> — ნიშნავს რომ გექნება ჩვეულებრივი სამუშაო მაგიდა (Desktop). <strong>ამ ვარიანტი აუცილებლად აირჩიე</strong> — სხვა ვარიანტებს არ აქვს ვიზუალური ინტერფეისი.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">4</div><strong>ინსტალაციის ტიპის არჩევა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>გამოჩნდება ორი ვარიანტი → აირჩიე: <strong>Custom: Install Microsoft Server Operating System only (advanced)</strong></span></div>
+      </div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>„Upgrade" ნუ აირჩიე — ის წინა ვერსიიდან განახლებისთვისაა. ჩვენ ახლიდან ვაყენებთ.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">5</div><strong>დისკის დაყოფა — C: (OS) და D: (Data)</strong></div>
+      <div class="note n-info"><span class="note-ico">📌</span>ახლა ხარ <strong>„Where do you want to install the operating system?"</strong> ეკრანზე. ნახავ ერთ ჩანაწერს: <code>Drive 0 Unallocated Space</code> (მთელი ცარიელი დისკი).</div>
+
+      <p><strong>ნაბიჯი 5.1 — C: დისკის შექმნა (OS-ისთვის):</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მონიშნე <code>Drive 0 Unallocated Space</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ქვემოთ ნახავ ღილაკებს → დააჭირე <span class="kb">New</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Size ველი გამოჩნდება MB-ში. C: = <strong>60GB</strong> → ჩაწერე <code>61440</code> (60 × 1024 = 61440) → <span class="kb">Apply</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Pop-up: <em>„Windows might create additional partitions for system files"</em> → <span class="kb">OK</span></span></div>
+      </div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>Windows ავტომატურად შექმნის <strong>500 MB System Reserved</strong> partition-ს. ეს ნორმალურია და <strong>ხელი ნუ ახლე</strong> — ამ partition-ს Windows-ის გასაშვებად სჭირდება.</div>
+
+      <p style="margin-top:12px"><strong>ნაბიჯი 5.2 — D: დისკის შექმნა (Data-სთვის):</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>სიაში კვლავ ნახავ <code>Unallocated Space</code> (დარჩენილი ადგილი) → მონიშნე</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">New</span> → Size: <strong>ნუ შეცვლი</strong> — ჩაყარე ყველაფერი → <span class="kb">Apply</span></span></div>
+      </div>
+
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Partition</th><th>ზომა</th><th>სახელი</th><th>დანიშნულება</th></tr></thead>
+          <tbody>
+            <tr><td>Partition 1</td><td>~500 MB</td><td>System Reserved</td><td>Windows Boot (ნუ შეეხები)</td></tr>
+            <tr><td>Partition 2 → <strong>C:</strong></td><td>~60 GB</td><td>Primary</td><td>Windows Server OS</td></tr>
+            <tr><td>Partition 3 → <strong>D:</strong></td><td>დარჩენილი</td><td>Primary</td><td>Files, Data, Shares</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p style="margin-top:12px"><strong>ნაბიჯი 5.3 — Windows-ის C: დისკზე დაყენება:</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>სიაში <strong>Partition 2</strong> (C:, ~60GB) მონიშნე → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ინსტალაცია დაიწყება ავტომატურად — <strong>10–25 წუთი</strong> გასტანს, სერვერი ორ-სამჯერ გადაიტვირთება</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გადატვირთვის შემდეგ: ეკრანზე გამოჩნდება <strong>„Customize settings"</strong> → ჩაწერე Administrator-ის პაროლი (მაგ: <code>Admin@2024!</code>) → <span class="kb">Finish</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> Windows Server 2022 ჩაიტვირთება. Server Manager გაიხსნება ავტომატურად.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Server Manager გახსნილი ეკრანი — გჩანდეს სერვერის სახელი და Dashboard</div>
+
+  </div>
+</div>
+
+
+<!-- ── S1-2 ── -->
+<div class="step" id="s1-2">
+  <div class="step-hd">
+    <div class="step-icon ic1">02</div>
+    <div class="step-hd-info">
+      <h3>AD DS, DHCP და DNS Role-ების ინსტალაცია</h3>
+      <div class="step-hd-meta">Server Manager → Manage → Add Roles and Features</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">1</div><strong>Add Roles and Features Wizard გახსნა</strong></div>
+      <p>Server Manager ჩვეულებრივ ავტომატურად იხსნება. თუ არა:</p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Start</span> (ქვედა მარცხენა) → ჩაწერე <code>Server Manager</code> → გახსენი</span></div>
+      </div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Manage</span><span class="np-arr">›</span>
+        <span class="np-fin">Add Roles and Features</span>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">2</div><strong>Wizard-ის გავლა — Before You Begin</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Before you begin ეკრანი → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Installation Type → მონიშნე <strong>Role-based or feature-based installation</strong> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Server Selection → სიაში ჩანს შენი სერვერი, ისედაც მონიშნულია → <span class="kb">Next</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">3</div><strong>Server Roles — 3 Role-ის მონიშვნა</strong></div>
+      <div class="note n-info"><span class="note-ico">📌</span>ახლა ხარ <strong>Server Roles</strong> ეტაპზე — გრძელი სია. ყურადღებით მოძებნე და მონიშნე ეს სამი:</div>
+      <ul class="cl" id="cl_roles">
+        <li onclick="toggle(this)"><div class="cbx"></div><span>🔍 სიაში მოძებნე <strong>Active Directory Domain Services</strong> → ✅ მონიშნე → გამოჩნდება Pop-up → <span class="kb">Add Features</span></span></li>
+        <li onclick="toggle(this)"><div class="cbx"></div><span>🔍 მოძებნე <strong>DHCP Server</strong> → ✅ მონიშნე → Pop-up → <span class="kb">Add Features</span></span></li>
+        <li onclick="toggle(this)"><div class="cbx"></div><span>🔍 მოძებნე <strong>DNS Server</strong> → ✅ მონიშნე → Pop-up → <span class="kb">Add Features</span></span></li>
+      </ul>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>Pop-up ფანჯარა კითხავს <em>„Add features that are required for [role]?"</em> — ყოველთვის <span class="kb">Add Features</span> დააჭირე, სხვაგვარად Role ვერ დაინსტალირდება.</div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>სამივე Role მონიშნული გაქვს → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Features ეტაპი → <span class="kb">Next</span> (ნუ შეცვლი)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>AD DS ეტაპი → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>DHCP ეტაპი → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>DNS ეტაპი → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Confirmation ეტაპი → ✅ მონიშნე „Restart the destination server automatically if required" → <span class="kb">Install</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>⏳ <strong>10–15 წუთი</strong> დაელოდე — Progress Bar-ს ადევნე თვალი</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>დასრულდა → <span class="kb">Close</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> Server Manager-ის მარცხენა სვეტში გამოჩნდება AD DS, DHCP, DNS. ყვითელი დროშა (() — ნორმალურია, მომდევნო ნაბიჯებში გაეწყება.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Installation results — Installation succeeded. AD DS, DHCP, DNS ჩანს Server Manager-ის მარცხენა სვეტში.</div>
+
+  </div>
+</div>
+
+
+<!-- ── S1-3 ── -->
+<div class="step" id="s1-3">
+  <div class="step-hd">
+    <div class="step-icon ic1">03</div>
+    <div class="step-hd-info">
+      <h3>ლოკალური მომხმარებელი „Server" — შექმნა და Administrator-ის უფლება</h3>
+      <div class="step-hd-meta">Computer Management → Local Users and Groups → Users</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-hot"><span class="note-ico">🚨</span><strong>რატომ ეს ნაბიჯი?</strong> Domain Controller-ის კონფიგურაცია (შემდეგი ნაბიჯი) <strong>უნდა</strong> გაკეთდეს სპეციალური ანგარიშით (<code>Server</code>) და არა built-in <code>Administrator</code>-ით. ეს უსაფრთხოების სტანდარტია — რეალურ კომპანიებში built-in Admin-ი ყოველთვის გამორთულია.</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">1</div><strong>Computer Management-ის გახსნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>კლავიატურაზე ერთდროულად დააჭირე <code>Win + R</code> → გაიხსნება პატარა „Run" ფანჯარა</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ველში ჩაწერე: <code>compmgmt.msc</code> → <span class="kb">OK</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">2</div><strong>Users სექციამდე მოსვლა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Management</span><span class="np-arr">›</span>
+        <span class="np-seg">System Tools</span><span class="np-arr">›</span>
+        <span class="np-seg">Local Users and Groups</span><span class="np-arr">›</span>
+        <span class="np-fin">Users</span>
+      </div>
+      <p>მარცხენა პანელში ნახავ ხეს — გაშალე <strong>System Tools</strong> → <strong>Local Users and Groups</strong> → დააჭირე <strong>Users</strong></p>
+      <p>მარჯვენა პანელში გამოჩნდება არსებული მომხმარებლები (<code>Administrator</code>, <code>Guest</code> და სხვ.)</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">3</div><strong>ახალი მომხმარებლის შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარჯვენა პანელში ცარიელ ადგილზე <strong>მარჯვენა ღილაკი</strong> → <strong>New User…</strong></span></div>
+      </div>
+      <p style="margin-top:10px">გაიხსნება ფანჯარა — შეავსე <strong>ზუსტად ასე:</strong></p>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>ველი</th><th>რა ჩაწეროს</th><th>შენიშვნა</th></tr></thead>
+          <tbody>
+            <tr><td>User name</td><td><code>Server</code></td><td>ზუსტად ასე, დიდი S-ით</td></tr>
+            <tr><td>Full name</td><td><code>Server Admin</code></td><td>სურვილისამებრ</td></tr>
+            <tr><td>Password</td><td><code>Admin@2024!</code></td><td>ან საკუთარი (8+ სიმბოლო, რიცხვი, სპეც. ნიშანი)</td></tr>
+            <tr><td>Confirm password</td><td>იგივე პაროლი</td><td></td></tr>
+            <tr><td>User must change password at next logon</td><td>❌ <strong>მოხსენი!</strong></td><td>მნიშვნელოვანია — ნუ დატოვებ ✓</td></tr>
+            <tr><td>Password never expires</td><td>✅ <strong>მონიშნე</strong></td><td>ლაბის გარემოსთვის მოხერხებულია</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Create</span> → შემდეგ <span class="kb">Close</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ახლა Users სიაში ნახავ ახალ <code>Server</code> მომხმარებელს</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">4</div><strong>Server მომხმარებლის Administrators ჯგუფში დამატება</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Users სიაში <strong><code>Server</code>-ზე</strong> ორჯერ დააჭირე (Double-click) → გაიხსნება Properties ფანჯარა</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ზედა ჩანართები: <strong>Member Of</strong> → დააჭირე → <span class="kb">Add…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ახალ ფანჯარაში ველში ჩაწერე: <code>Administrators</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Check Names</span> → ტექსტი <u>ხაზი გაუსვა</u> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Member Of სიაში ახლა ჩანს <strong>Administrators</strong> → <span class="kb">Apply</span> → <span class="kb">OK</span></span></div>
+      </div>
+      <div class="note n-info"><span class="note-ico">💡</span>Check Names ფუნქცია ამოწმებს ჯგუფის სახელს. თუ ხაზი გაუსვა — ყველაფერი სწორია. თუ შეცდომა — სახელი ხელახლა შეიყვანე.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">5</div><strong>სისტემაში Server ანგარიშით შესვლა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Start</span> → მომხმარებლის სახელი (ქვედა მარცხნივ) → <strong>Sign out</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>შესვლის ეკრანზე: ქვედა მარცხნივ <strong>Other user</strong> → Username: <code>Server</code> → Password: შენი პაროლი → Enter</span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> ახლა სისტემაში ხარ <code>Server</code> ანგარიშით. Server Manager ისევ გაიხსნება.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Computer Management → Users სიაში ჩანს „Server" მომხმარებელი; Member Of ჩანართში — Administrators</div>
+
+  </div>
+</div>
+
+
+<!-- ── S1-4 ── -->
+<div class="step" id="s1-4">
+  <div class="step-hd">
+    <div class="step-icon ic1">04</div>
+    <div class="step-hd-info">
+      <h3>სერვერის Domain Controller-ად დაწინაურება (AD DS კონფიგურაცია)</h3>
+      <div class="step-hd-meta">Server Manager → ყვითელი დროშა → Promote this server</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-hot"><span class="note-ico">📌</span><strong>დომეინის სახელი = შენი გვარი + .local</strong><br>მაგ: <code>beridze.local</code> &nbsp;|&nbsp; <code>shbichiashvili.local</code> &nbsp;|&nbsp; <code>kvaratskhelia.local</code></div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">1</div><strong>Promotion Wizard-ის გახსნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Server Manager-ის <strong>ზედა მარჯვენა</strong> კუთხეში ნახავ <strong>🚩 ყვითელ დროშის ხატს</strong> → დააჭირე</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გამოჩნდება ტექსტი: <em>„Post-deployment Configuration"</em> → ლინკი <strong>„Promote this server to a domain controller"</strong> → დააჭირე</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">2</div><strong>Deployment Configuration — ახალი Forest</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>სამი ვარიანტიდან აირჩიე: <strong>Add a new forest</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Root domain name ველში ჩაწერე: <code>შენიგვარი.local</code> (ლათინური ასოებით!) → <span class="kb">Next</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">3</div><strong>Domain Controller Options</strong></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>ველი</th><th>მნიშვნელობა</th><th>შენიშვნა</th></tr></thead>
+          <tbody>
+            <tr><td>Forest functional level</td><td><code>Windows Server 2016</code></td><td>ან 2022 — ნებისმიერი მუშაობს</td></tr>
+            <tr><td>Domain functional level</td><td><code>Windows Server 2016</code></td><td></td></tr>
+            <tr><td>Domain Name System (DNS) server</td><td>✅ მონიშნული</td><td>ნუ მოხსნი!</td></tr>
+            <tr><td>Global Catalog (GC)</td><td>✅ მონიშნული</td><td>ნუ მოხსნი!</td></tr>
+            <tr><td>Directory Services Restore Mode (DSRM) password</td><td>ჩაწერე პაროლი</td><td><strong>დაიმახსოვრე!</strong> (მაგ: <code>DSRM@2024!</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Next</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">4</div><strong>DNS Options, Paths, Review</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><strong>DNS Options</strong>: ყვითელი Warning გამოჩნდება — <span class="kb">Next</span> (ეს ნორმალურია ახალ სისტემაში)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Additional Options</strong>: NetBIOS domain name ავტომატურად შეივსება (მაგ: <code>BERIDZE</code>) → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Paths</strong>: ყველა default → <span class="kb">Next</span> (ნუ შეცვლი)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Review Options</strong>: გადახედე → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Prerequisites Check</strong>: ყველა მწვანე? → <span class="kb">Install</span></span></div>
+      </div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>Prerequisites Check-ზე შეიძლება ყვითელი Warning-ები იყოს — ეს ნორმალურია. <strong>Install</strong> ღილაკი მაინც დააჭირე. ინსტალაციის შემდეგ სერვერი <strong>ავტომატურად გადაიტვირთება</strong>.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn1">5</div><strong>გადატვირთვის შემდეგ</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Login ეკრანზე ნახავ: <strong>YOURDOMAIN\Server</strong> — ეს ნიშნავს რომ Domain Controller-ი მუშაობს!</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>შეიყვანე <code>Server</code>-ის პაროლი</span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> სერვერი ახლა Domain Controller-ია! Server Manager-ში ჩანს: AD DS, DNS, DHCP სვეტები.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Login ეკრანი — ჩანს DOMAIN\Server. Server Manager გახსნილი — AD DS, DNS ჩანს სვეტებში.</div>
+
+  </div>
+</div>
+
+
+<!--===========================================
+    PART 2
+============================================-->
+<div class="part-header" id="part2">
+  <div class="part-pill pp2">ნაწილი 2</div>
+  <h2>სერვისების კონფიგურაცია</h2>
+</div>
+
+
+<!-- ── S2-1 ── -->
+<div class="step" id="s2-1">
+  <div class="step-hd">
+    <div class="step-icon ic2">01</div>
+    <div class="step-hd-info">
+      <h3>DHCP — ორი Scope (10.0.1.0/24 და 10.0.2.0/24)</h3>
+      <div class="step-hd-meta">Server Manager → Tools → DHCP</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-info"><span class="note-ico">💡</span><strong>DHCP რა არის?</strong> DHCP სერვერი ქსელის მოწყობილობებს <strong>ავტომატურად არიგებს IP მისამართებს</strong>. ვქმნით ორ „Scope"-ს — ეს ნიშნავს ორ ქსელს ორი სხვადასხვა IP დიაპაზონით.</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>DHCP კონსოლის გახსნა და Authorize</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Tools</span><span class="np-arr">›</span>
+        <span class="np-fin">DHCP</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>DHCP კონსოლი გაიხსნება. მარცხნივ ნახავ სერვერის სახელს (მაგ: <code>WIN-XXXX.beridze.local</code>)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>სერვერის სახელზე <strong>მარჯვენა ღილაკი</strong> → <strong>Authorize</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>კვლავ მარჯვენა ღილაკი → <strong>Refresh</strong> → IPv4 ხატი მწვანე ↑ უნდა გახდეს</span></div>
+      </div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>Authorize <strong>სავალდებულოა</strong>. მის გარეშე DHCP სერვერი IP-ებს ვერ დაარიგებს.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>პირველი Scope — 10.0.1.0/24</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარცხნივ <strong>IPv4</strong>-ზე მარჯვენა ღილაკი → <strong>New Scope…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>New Scope Wizard → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>NET-10.0.1.0</code> → Description: <code>ქსელი 1</code> (სურვილისამებრ) → <span class="kb">Next</span></span></div>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>ველი</th><th>მნიშვნელობა</th></tr></thead>
+          <tbody>
+            <tr><td>Start IP address</td><td><code>10.0.1.10</code></td></tr>
+            <tr><td>End IP address</td><td><code>10.0.1.254</code></td></tr>
+            <tr><td>Length</td><td><code>24</code></td></tr>
+            <tr><td>Subnet mask</td><td><code>255.255.255.0</code> (ავტომატურად)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Next</span> → Add Exclusions: <span class="kb">Next</span> (ნუ შეცვლი) → Lease Duration: <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Configure DHCP Options: მონიშნე <strong>Yes</strong> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Router (Default Gateway): ველში ჩაწერე <code>10.0.1.1</code> → <span class="kb">Add</span> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Domain Name and DNS Servers: Parent domain = <code>შენიგვარი.local</code>; Server name ველი ცარიელი დატოვე; IP address = DC-ის IP → <span class="kb">Add</span> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>WINS Servers: <span class="kb">Next</span> (ნუ შეცვლი)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Activate Scope: <strong>Yes, I want to activate this scope now</strong> → <span class="kb">Next</span> → <span class="kb">Finish</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>მეორე Scope — 10.0.2.0/24 (იდენტური ნაბიჯები)</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>IPv4 → მარჯვენა ღილაკი → <strong>New Scope…</strong> → <span class="kb">Next</span> → Name: <code>NET-10.0.2.0</code> → <span class="kb">Next</span></span></div>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>ველი</th><th>მნიშვნელობა</th></tr></thead>
+          <tbody>
+            <tr><td>Start IP</td><td><code>10.0.2.10</code></td></tr>
+            <tr><td>End IP</td><td><code>10.0.2.254</code></td></tr>
+            <tr><td>Subnet mask</td><td><code>255.255.255.0</code></td></tr>
+            <tr><td>Router</td><td><code>10.0.2.1</code></td></tr>
+            <tr><td>DNS</td><td>DC-ის IP</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>ყველა ნაბიჯი იგივე → Activate: <strong>Yes</strong> → <span class="kb">Finish</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> IPv4-ის ქვეშ ჩანს 2 Scope — ორივეს წინ <strong>მწვანე ✓</strong> (Active). Inactive იყო? → Scope-ზე მარჯვენა ღილაკი → Activate.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: DHCP კონსოლი — ორივე Scope ჩანს: NET-10.0.1.0 და NET-10.0.2.0, ორივე Active (მწვანე)</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-2 ── -->
+<div class="step" id="s2-2">
+  <div class="step-hd">
+    <div class="step-icon ic2">02</div>
+    <div class="step-hd-info">
+      <h3>AD/DC — 4 OU, 12 ჯგუფი, 36 მომხმარებელი, Trust Relationships</h3>
+      <div class="step-hd-meta">Active Directory Users and Computers</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>Active Directory Users and Computers გახსნა</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Tools</span><span class="np-arr">›</span>
+        <span class="np-fin">Active Directory Users and Computers</span>
+      </div>
+      <p>მარცხნივ ნახავ ხეს — შენი დომეინი (მაგ: <code>beridze.local</code>). ამ ხეში ვიმუშავებთ.</p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>4 Organizational Unit-ის შექმნა</strong></div>
+      <div class="note n-info"><span class="note-ico">💡</span><strong>OU (Organizational Unit)</strong> — ეს არის „საქაღალდე" AD-ში, სადაც ინახება მომხმარებლები, ჯგუფები, კომპიუტერები. OU-ების მიხედვით შეიძლება GPO პოლიტიკების გამოყენება.</div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარცხნივ: <strong>შენს დომეინზე</strong> (მაგ: <code>beridze.local</code>) მარჯვენა ღილაკი → <strong>New</strong> → <strong>Organizational Unit</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>Sales</code> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გაიმეორე: შექმენი <code>Manager</code>, <code>HR</code>, <code>IT</code> — ანუ სულ 4 OU</span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span>მარცხენა ხეში ნახავ 4 OU-ს: Sales, Manager, HR, IT</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>თითო OU-ში 3 Security Group</strong></div>
+      <p>ყოველ OU-ში 3 ჯგუფი უნდა შეიქმნას. ქვემოთ Sales OU-ს მაგალითი — იგივე გაიმეორე Manager, HR, IT-სთვის:</p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარცხნივ <strong>Sales</strong> OU-ზე დააჭირე (გახსნა) → OU შიგნით მარჯვენა ღილაკი → <strong>New</strong> → <strong>Group</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Group name: <code>Sales_Group1</code> → Group scope: <strong>Global</strong> → Group type: <strong>Security</strong> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გაიმეორე: <code>Sales_Group2</code>, <code>Sales_Group3</code></span></div>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>OU</th><th>შექმნილი ჯგუფები</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Sales</strong></td><td><code>Sales_Group1</code>, <code>Sales_Group2</code>, <code>Sales_Group3</code></td></tr>
+            <tr><td><strong>Manager</strong></td><td><code>Manager_Group1</code>, <code>Manager_Group2</code>, <code>Manager_Group3</code></td></tr>
+            <tr><td><strong>HR</strong></td><td><code>HR_Group1</code>, <code>HR_Group2</code>, <code>HR_Group3</code></td></tr>
+            <tr><td><strong>IT</strong></td><td><code>IT_Group1</code>, <code>IT_Group2</code>, <code>IT_Group3</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>თითო OU-ში 3 მომხმარებელი — ჯგუფში გაწევრიანება</strong></div>
+      <p>Sales OU-ს მაგალითი (იგივე გაიმეორე Manager, HR, IT-სთვის):</p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Sales OU → მარჯვენა ღილაკი → <strong>New</strong> → <strong>User</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>First name: <code>Sales</code> → Last name: <code>User1</code> → User logon name: <code>SalesUser1</code> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Password: <code>Pass@2024!</code> → ✅ Password never expires → <span class="kb">Next</span> → <span class="kb">Finish</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გაიმეორე: <code>SalesUser2</code>, <code>SalesUser3</code></span></div>
+      </div>
+      <p style="margin-top:10px"><strong>ჯგუფში დამატება:</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><code>SalesUser1</code>-ზე მარჯვენა ღილაკი → <strong>Add to a group…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ჩაწერე <code>Sales_Group1</code> → <span class="kb">Check Names</span> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>SalesUser2 → Sales_Group2; SalesUser3 → Sales_Group3</span></div>
+      </div>
+      <div class="note n-info"><span class="note-ico">💡</span>სულ უნდა შეიქმნას: <strong>12 ჯგუფი</strong> (4 OU × 3) და <strong>36 User</strong> თუ თითო ჯგუფში ცალ-ცალკე User-ებს ათავსებ, ან <strong>12 User</strong> (3 per OU) — დავალება ამბობს „თითო ჯგუფში 3 წევრი".</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">5</div><strong>Trust Relationships — წვდომის დონეები</strong></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>დეპარტამენტი</th><th>სად აქვთ წვდომა?</th><th>Trust ტიპი</th></tr></thead>
+          <tbody>
+            <tr><td><strong>IT</strong></td><td>გარე ფორესტები (External Forests)</td><td>Forest Trust — ორ Forest-ს შორის</td></tr>
+            <tr><td><strong>Manager</strong></td><td>იმავე ფორესტის სხვა დომეინები</td><td>Shortcut Trust — ერთი ფორესტის შიგნით</td></tr>
+            <tr><td><strong>Sales</strong></td><td>მხოლოდ საკუთარი დომეინი</td><td>Trust არ სჭირდება</td></tr>
+            <tr><td><strong>HR</strong></td><td>მხოლოდ საკუთარი დომეინი</td><td>Trust არ სჭირდება</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="scr">📸 სქრინი: AD Users and Computers — 4 OU ჩანს; Sales OU-ში ჩანს ჯგუფები და Users-ები</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-3 ── -->
+<div class="step" id="s2-3">
+  <div class="step-hd">
+    <div class="step-icon ic2">03</div>
+    <div class="step-hd-info">
+      <h3>File Server — საქაღალდეები, NTFS, Quota, File Screening</h3>
+      <div class="step-hd-meta">File Explorer + FSRM (File Server Resource Manager)</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>საქაღალდეების სტრუქტურის შექმნა D: დისკზე</strong></div>
+      <div class="note n-info"><span class="note-ico">📁</span>ეს არის სტრუქტურა, რომელსაც ვქმნით. ყოველი განყოფილება ხედავს მხოლოდ თავის საქაღალდეს. IT ხედავს ყველაფერს.</div>
+
+      <!-- VISUAL FOLDER TREE -->
+      <div class="ftree">
+        <div class="ftree-root">
+          <span class="ftree-icon">💾</span>
+          <span class="ftree-name">D:\CompanyData\</span>
+          <span class="ftree-desc">— მთავარი Data დისკი</span>
+        </div>
+
+        <!-- Departments branch -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:10px; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item">
+            <span class="ftree-icon">📂</span>
+            <span class="ftree-name">Departments\</span>
+            <span class="ftree-desc">— ყველა განყოფილების საქაღალდეები</span>
+          </div>
+        </div>
+
+        <!-- Sales -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0; position:relative;"><div style="position:absolute; left:10px; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div></div>
+          <div style="width:20px; flex-shrink:0; position:relative;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item" style="background:#eff6ff; border-radius:6px;">
+            <span class="ftree-icon">📁</span>
+            <span class="ftree-name" style="color:#1d4ed8;">Sales\</span>
+            <span class="ftree-desc">— Sales-ის საერთო სამუშაო სივრცე &nbsp;·&nbsp; 20GB ლიმიტი</span>
+          </div>
+        </div>
+
+        <!-- Manager -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0; position:relative;"><div style="position:absolute; left:10px; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div></div>
+          <div style="width:20px; flex-shrink:0;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item" style="background:#ecfdf5; border-radius:6px;">
+            <span class="ftree-icon">📁</span>
+            <span class="ftree-name" style="color:#065f46;">Manager\</span>
+            <span class="ftree-desc">— Manager-ის საერთო სამუშაო სივრცე &nbsp;·&nbsp; 20GB ლიმიტი</span>
+          </div>
+        </div>
+
+        <!-- HR -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0; position:relative;"><div style="position:absolute; left:10px; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div></div>
+          <div style="width:20px; flex-shrink:0;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item" style="background:#fff7ed; border-radius:6px;">
+            <span class="ftree-icon">📁</span>
+            <span class="ftree-name" style="color:#92400e;">HR\</span>
+            <span class="ftree-desc">— HR-ის საერთო სამუშაო სივრცე &nbsp;·&nbsp; 20GB ლიმიტი</span>
+          </div>
+        </div>
+
+        <!-- IT -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0; position:relative;"><div style="position:absolute; left:10px; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div></div>
+          <div style="width:20px; flex-shrink:0;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:0; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item" style="background:#f5f3ff; border-radius:6px;">
+            <span class="ftree-icon">📁</span>
+            <span class="ftree-name" style="color:#6d28d9;">IT\</span>
+            <span class="ftree-desc">— IT-ის საქაღალდე &nbsp;·&nbsp; 20GB &nbsp;·&nbsp; <strong style="color:#7c3aed;">IT ხედავს ყველა განყოფილებას!</strong></span>
+          </div>
+        </div>
+
+        <!-- Home branch -->
+        <div style="display:flex; align-items:stretch; min-height:34px; margin-top:4px;">
+          <div style="width:20px; flex-shrink:0; position:relative;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item">
+            <span class="ftree-icon">🏠</span>
+            <span class="ftree-name">Home\</span>
+            <span class="ftree-desc">— თითო მომხმარებლის <strong>პირადი</strong> სივრცე</span>
+          </div>
+        </div>
+
+        <!-- %username% -->
+        <div style="display:flex; align-items:stretch; min-height:34px;">
+          <div style="width:20px; flex-shrink:0;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;"></div>
+          <div style="width:20px; flex-shrink:0; position:relative;">
+            <div style="position:absolute; left:0; top:50%; right:0; height:1.5px; background:#c7d7f0;"></div>
+            <div style="position:absolute; left:0; top:0; bottom:50%; width:1.5px; background:#c7d7f0;"></div>
+          </div>
+          <div class="ftree-item" style="opacity:0.7;">
+            <span class="ftree-icon">👤</span>
+            <span class="ftree-name" style="color:#94a3b8; font-style:italic;">%username%\</span>
+            <span class="ftree-desc">— H: დისკი — ავტომატურად შეიქმნება User-ის შესვლისას</span>
+          </div>
+        </div>
+      </div>
+
+      <p style="margin-top:12px"><strong>შექმენი:</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>გახსენი <strong>File Explorer</strong> → <code>D:\</code> → Right-click → New Folder → <code>CompanyData</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><code>D:\CompanyData\</code>-ში: New Folder → <code>Departments</code>; კიდევ New Folder → <code>Home</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><code>D:\CompanyData\Departments\</code>-ში: 4 საქაღალდე → <code>Sales</code>, <code>Manager</code>, <code>HR</code>, <code>IT</code></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>Departments — გაზიარება (Sharing) + NTFS უფლებები</strong></div>
+      <p><strong>ნაბიჯი A — Departments$ გაზიარება (root):</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><code>Departments</code> საქაღალდეზე <strong>Right-click → Properties</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ჩანართი <strong>Sharing</strong> → <span class="kb">Advanced Sharing…</span> → ✅ <strong>Share this folder</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Share name: <code>Departments$</code> ($ — ნიშნავს რომ Share ქსელში <strong>ჩვეულებრივ არ ჩანს</strong>)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Permissions</span> → <strong>Everyone</strong> მონიშნე → <span class="kb">Remove</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Add…</span> → <code>IT_Group1</code> → Check Names → OK → Permission: ✅ <strong>Full Control</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Add…</span> → <code>Sales_Group1</code> → OK → Permission: ✅ <strong>Read</strong> (ნუ მისცემ Write-ს)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გაიმეორე: <code>Manager_Group1</code> → Read; <code>HR_Group1</code> → Read</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">OK</span> → <span class="kb">OK</span> → <span class="kb">Close</span></span></div>
+      </div>
+
+      <p style="margin-top:14px"><strong>ნაბიჯი B — NTFS Security Permission თითო Sub-საქაღალდეზე:</strong></p>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>NTFS Permission <strong>ყოველ</strong> Department-ის საქაღალდეზე ცალ-ცალკე უნდა დაყენდეს. Share Permission მხოლოდ ქსელური წვდომის „კარია", NTFS კი ფაქტიური შეზღუდვაა.</div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>საქაღალდე</th><th>ჯგუფი</th><th>NTFS Permission</th></tr></thead>
+          <tbody>
+            <tr><td>Sales\</td><td>Sales_Group1</td><td>Modify (Read + Write + Execute)</td></tr>
+            <tr><td>Sales\</td><td>IT_Group1</td><td>Full Control</td></tr>
+            <tr><td>Manager\</td><td>Manager_Group1</td><td>Modify</td></tr>
+            <tr><td>Manager\</td><td>IT_Group1</td><td>Full Control</td></tr>
+            <tr><td>HR\</td><td>HR_Group1</td><td>Modify</td></tr>
+            <tr><td>HR\</td><td>IT_Group1</td><td>Full Control</td></tr>
+            <tr><td>IT\</td><td>IT_Group1</td><td>Full Control</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ყოველ საქაღალდეზე: <strong>Right-click → Properties → Security ჩანართი → Edit… → Add…</strong> → ჯგუფი → Permission</p>
+      <div class="note n-info"><span class="note-ico">💡</span>Inheritance (მემკვიდრეობა) — NTFS-ი ავტომატურად „ჩამოდის" parent-დან child-ზე. Sales\ საქაღალდეს არ დაამატო Manager_Group — ისედაც ვერ ნახავს.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>Home Folder — H: დისკი თითო User-ისთვის</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>AD Users and Computers → User-ზე <strong>Double-click</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ჩანართი <strong>Profile</strong> → Home Folder სექცია</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>მონიშნე <strong>Connect</strong> → Drive letter: <strong>H:</strong> → To: <code>\\SERVERNAME\Home\%username%</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Apply</span> → <span class="kb">OK</span> — საქაღალდე <code>D:\CompanyData\Home\username\</code> ავტომატურად შეიქმნება</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>FSRM ინსტალაცია (File Server Resource Manager)</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager → Add Roles and Features</span><span class="np-arr">›</span>
+        <span class="np-seg">File and Storage Services</span><span class="np-arr">›</span>
+        <span class="np-seg">File and iSCSI Services</span><span class="np-arr">›</span>
+        <span class="np-fin">File Server Resource Manager</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>✅ <strong>File Server Resource Manager</strong> მონიშნე → <span class="kb">Add Features</span> → <span class="kb">Install</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">5</div><strong>File Screen — ვიდეო/აუდიო ბლოკი Departments-სთვის</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager → Tools</span><span class="np-arr">›</span>
+        <span class="np-seg">File Server Resource Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">File Screening Management</span><span class="np-arr">›</span>
+        <span class="np-fin">File Screens</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარჯვნივ ცარიელ ადგილზე <strong>Right-click → Create File Screen…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>File screen path: <code>D:\CompanyData\Departments</code> (Browse ღილაკით მოძებნე)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>მონიშნე: <strong>Derive properties from this file screen template</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Dropdown-ში აირჩიე: <strong>Block Audio and Video Files</strong> → <span class="kb">Create</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span>ახლა არავინ ვერ ატვირთავს mp3, mp4, avi, mkv, wav ფაილებს Departments საქაღალდეში</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">6</div><strong>Quota — 20GB ლიმიტი თითო Department-ის საქაღალდეზე</strong></div>
+      <div class="np">
+        <span class="np-seg">FSRM</span><span class="np-arr">›</span>
+        <span class="np-seg">Quota Management</span><span class="np-arr">›</span>
+        <span class="np-fin">Quotas</span>
+      </div>
+      <p>Sales-ის მაგალითი — გაიმეორე Manager, HR, IT-სთვის:</p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Quotas → Right-click → <strong>Create Quota…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Quota path: <code>D:\CompanyData\Departments\Sales</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>მონიშნე: <strong>Define custom quota properties</strong> → <span class="kb">Custom Properties…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Space limit: ველში ჩაწერე <code>20</code> → Dropdown: <strong>GB</strong> → Quota type: <strong>Hard quota</strong> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Create</span> → გაიმეორე Manager, HR, IT-სთვის</span></div>
+      </div>
+    </div>
+
+    <div class="scr">📸 სქრინი: FSRM → File Screens (ჩანს Departments-ზე Screen); Quotas (ჩანს 4 Quota — 20GB)</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-4 ── -->
+<div class="step" id="s2-4">
+  <div class="step-hd">
+    <div class="step-icon ic2">04</div>
+    <div class="step-hd-info">
+      <h3>GPO — Password Policy (Fine-Grained) ყველა OU-სთვის</h3>
+      <div class="step-hd-meta">AD Administrative Center → System → Password Settings Container</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-info"><span class="note-ico">💡</span><strong>FGPP — Fine-Grained Password Policy</strong>: „Default Domain Policy"-ს პაროლის პარამეტრები მთელ დომეინს ემსახურება. OU-ების მიხედვით <strong>სხვადასხვა</strong> პაროლის პოლიტიკა FGPP-ით ხდება. ეს Windows Server 2008+-ის ფუნქციაა.</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>AD Administrative Center გახსნა</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Tools</span><span class="np-arr">›</span>
+        <span class="np-fin">Active Directory Administrative Center</span>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>Password Settings Container-ის გახსნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარცხნივ: <strong>Tree View</strong> ჩანართი (ზედა) → შენი დომეინი (მაგ: beridze (local)) → <strong>System</strong> → <strong>Password Settings Container</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>მარჯვნივ ცარიელ ადგილზე Right-click → <strong>New</strong> → <strong>Password Settings</strong></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>Password Settings ფანჯრის შევსება</strong></div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>#</th><th>ველი</th><th>მნიშვნელობა</th></tr></thead>
+          <tbody>
+            <tr><td>—</td><td>Name</td><td><code>OU-Password-Policy</code></td></tr>
+            <tr><td>—</td><td>Precedence</td><td><code>1</code> (პრიორიტეტი)</td></tr>
+            <tr><td>1</td><td>Enforce minimum password length</td><td>✅ მონიშნე → <code>8</code></td></tr>
+            <tr><td>2</td><td>Enforce password history</td><td>✅ მონიშნე → <code>7</code></td></tr>
+            <tr><td>3</td><td>Password must meet complexity requirements</td><td>✅ Enabled (მონიშნე)</td></tr>
+            <tr><td>4</td><td>Enforce maximum password age (user must change password after)</td><td>✅ მონიშნე → <code>14 days</code></td></tr>
+            <tr><td>5</td><td>Enforce account lockout policy</td><td>✅ მონიშნე</td></tr>
+            <tr><td>5a</td><td>Number of failed logon attempts allowed</td><td><code>5</code></td></tr>
+            <tr><td>5b</td><td>Account will be locked out for</td><td><code>60</code> minutes</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>Policy-ს OU-ჯგუფებზე მიბმა</strong></div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>FGPP პირდაპირ OU-ზე კი <strong>არ</strong> ედება — <strong>Security Group-ზე</strong> ედება. ამიტომ ჯერ შექმენი Policy Group-ები.</div>
+      <p><strong>ნაბიჯი A — Policy Group-ების შექმნა (AD Users and Computers-ში):</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Sales OU → New Group → <code>Sales_PolicyGroup</code> (Global Security) → OK → Members-ში დაამატე SalesUser1, 2, 3</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>HR OU → <code>HR_PolicyGroup</code> → HRUser1, 2, 3</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Manager OU → <code>Manager_PolicyGroup</code> → ManagerUser1, 2, 3</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>IT OU → <code>IT_PolicyGroup</code> → ITUser1, 2, 3</span></div>
+      </div>
+      <p style="margin-top:10px"><strong>ნაბიჯი B — Password Settings-ში ჯგუფების დამატება:</strong></p>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>AD Admin Center → Password Settings → <code>OU-Password-Policy</code>-ზე Double-click</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ფანჯრის ქვეში: <strong>„Directly Applies To"</strong> სექცია → <span class="kb">Add…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>დაამატე: <code>Sales_PolicyGroup</code>, <code>HR_PolicyGroup</code>, <code>Manager_PolicyGroup</code>, <code>IT_PolicyGroup</code> → <span class="kb">OK</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span><strong>შედეგი:</strong> ყველა OU-ს მომხმარებელი ახლა ექვემდებარება OU-Password-Policy-ს</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: AD Admin Center → Password Settings Container — OU-Password-Policy ჩანს; Directly Applies To-ში 4 ჯგუფი</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-5 ── -->
+<div class="step" id="s2-5">
+  <div class="step-hd">
+    <div class="step-icon ic2">05</div>
+    <div class="step-hd-info">
+      <h3>GPO — 9 შეზღუდვა Sales, HR, Manager-სთვის (IT გამოირიცხება)</h3>
+      <div class="step-hd-meta">Group Policy Management → User-Restriction-Policy</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>GPO-ს შექმნა და OU-ებზე მიბმა</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Tools</span><span class="np-arr">›</span>
+        <span class="np-fin">Group Policy Management</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>მარცხნივ: Forest → Domains → შენი დომეინი → <strong>Sales</strong> OU → Right-click → <strong>Create a GPO in this domain, and Link it here…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>User-Restriction-Policy</code> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>HR</strong> OU → Right-click → <strong>Link an Existing GPO…</strong> → აირჩიე <code>User-Restriction-Policy</code> → OK</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Manager</strong> OU → Right-click → <strong>Link an Existing GPO…</strong> → <code>User-Restriction-Policy</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>IT OU</strong>-ზე ნუ მიაბამ! IT-ს ეს შეზღუდვები <strong>არ ეხება</strong>.</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Sales OU-ში: <code>User-Restriction-Policy</code>-ზე Right-click → <strong>Edit…</strong></span></div>
+      </div>
+      <div class="note n-info"><span class="note-ico">💡</span>GPO Editor გახსნილ ფანჯარაში ვიმუშავებთ შემდეგ ნაბიჯებში — <strong>ნუ დახურავ!</strong></div>
+    </div>
+
+    <hr>
+    <div class="sec-lbl">— GPO Editor — ყოველი შეზღუდვა ცალ-ცალკე</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>შეზღუდვა 1 — System Restore-ის დაბლოკვა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Policies</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">System</span><span class="np-arr">›</span>
+        <span class="np-fin">System Restore</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Turn off Configuration</strong> → Double-click → <strong>Enabled</strong> → OK</span></li>
+      <li onclick="toggle(this)"><div class="cbx"></div><span><strong>Turn off System Restore</strong> → Double-click → <strong>Enabled</strong> → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>შეზღუდვა 2 — Windows Update გათიშვის ჩაკეტვა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Components</span><span class="np-arr">›</span>
+        <span class="np-fin">Windows Update</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Remove access to use all Windows Update features</strong> → Enabled → OK</span></li>
+      <li onclick="toggle(this)"><div class="cbx"></div><span><strong>Do not connect to any Windows Update internet locations</strong> → Enabled → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>შეზღუდვა 3 — Desktop-ზე Computer, Network, Control Panel ხატები</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">Desktop</span><span class="np-arr">›</span>
+        <span class="np-fin">Desktop</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Remove Computer icon on the desktop</strong> → <strong>Disabled</strong> → OK (Disabled ნიშნავს — „არ დამალო" = გამოჩნდეს)</span></li>
+      <li onclick="toggle(this)"><div class="cbx"></div><span><strong>Remove Network Locations icon from desktop</strong> → <strong>Disabled</strong> → OK</span></li></ul>
+      <div class="np" style="margin-top:10px">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-fin">Control Panel</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Prohibit access to Control Panel and PC settings</strong> → <strong>Disabled</strong> → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">5</div><strong>შეზღუდვა 4 — საქაღალდე ერთი კლიკით გახსნა</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Components</span><span class="np-arr">›</span>
+        <span class="np-fin">File Explorer</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Enable single-click to open an item (point to select)</strong> → <strong>Enabled</strong> → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">6</div><strong>შეზღუდვა 5 — Desktop-ზე File Server მალსახმობი</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Preferences</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Settings</span><span class="np-arr">›</span>
+        <span class="np-fin">Shortcuts</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Right-click → <strong>New → Shortcut</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Action: <code>Create</code> | Name: <code>FileServer</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Location: <strong>Desktop</strong> | Target type: <strong>File System Object</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Target path: <code>\\SERVERNAME\Departments$</code> → <span class="kb">OK</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">7</div><strong>შეზღუდვა 6 — USB Flash მეხსიერების დაბლოკვა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">System</span><span class="np-arr">›</span>
+        <span class="np-fin">Removable Storage Access</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Removable Disks: Deny read access</strong> → Enabled → OK</span></li>
+      <li onclick="toggle(this)"><div class="cbx"></div><span><strong>Removable Disks: Deny write access</strong> → Enabled → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">8</div><strong>შეზღუდვა 7 — პროგრამების ინსტალაციის დაბლოკვა</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Components</span><span class="np-arr">›</span>
+        <span class="np-fin">Windows Installer</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Disable Windows Installer</strong> → Enabled → Options Dropdown: <strong>Always</strong> → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">9</div><strong>შეზღუდვა 8 — Hotspot / ქსელის გაზიარების დაბლოკვა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Administrative Templates</span><span class="np-arr">›</span>
+        <span class="np-seg">Network</span><span class="np-arr">›</span>
+        <span class="np-fin">Network Connections</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Prohibit use of Internet Connection Sharing on your DNS domain network</strong> → Enabled → OK</span></li>
+      <li onclick="toggle(this)"><div class="cbx"></div><span><strong>Prohibit installation and configuration of Network Bridge on your DNS domain network</strong> → Enabled → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">10</div><strong>შეზღუდვა 9 — 10 წუთი პასიური → ავტო-გამოსვლა</strong></div>
+      <div class="np">
+        <span class="np-seg">Computer Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Settings</span><span class="np-arr">›</span>
+        <span class="np-seg">Security Settings</span><span class="np-arr">›</span>
+        <span class="np-seg">Local Policies</span><span class="np-arr">›</span>
+        <span class="np-fin">Security Options</span>
+      </div>
+      <ul class="cl"><li onclick="toggle(this)"><div class="cbx"></div><span><strong>Interactive logon: Machine inactivity limit</strong> → Double-click → ჩაწერე <code>600</code> (= 10 წუთი წამებში) → OK</span></li></ul>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">11</div><strong>GPO-ს გამოყენება (Force Update)</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>GPO Editor დახურე</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Start</span> → Right-click → <strong>Windows PowerShell (Admin)</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ჩაწერე და Enter: <span class="cmd-block">gpupdate /force</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>დაელოდე <em>„User Policy update has completed successfully"</em> შეტყობინებას</span></div>
+      </div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Group Policy Management — Sales, HR, Manager OU-ებზე ჩანს User-Restriction-Policy მიბმული; IT-ზე — არ ჩანს</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-6 ── -->
+<div class="step" id="s2-6">
+  <div class="step-hd">
+    <div class="step-icon ic2">06</div>
+    <div class="step-hd-info">
+      <h3>Print Server + HP LaserJet Pro M15a (IP: 192.168.131.150)</h3>
+      <div class="step-hd-meta">Print and Document Services → Print Management</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>Print Server Role-ის ინსტალაცია</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager</span><span class="np-arr">›</span>
+        <span class="np-seg">Manage</span><span class="np-arr">›</span>
+        <span class="np-fin">Add Roles and Features</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Server Roles ეტაპი → <strong>Print and Document Services</strong> → Pop-up → <span class="kb">Add Features</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Print Services ჩამონათვალი გამოჩნდება → ✅ <strong>Print Server</strong> მონიშნული უნდა იყოს</span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Next</span> → <span class="kb">Next</span> → <span class="kb">Install</span> → დაელოდე → <span class="kb">Close</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>Print Management კონსოლი + Driver-ები</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><code>Win + R</code> → <code>printmanagement.msc</code> → <span class="kb">OK</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Print Servers → შენი სერვერი → <strong>Drivers</strong> → Right-click → <strong>Add Driver…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Add Printer Driver Wizard → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Processors: ✅ <strong>x64</strong> და ✅ <strong>x86 (32-bit)</strong> ორივე მონიშნე → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Printer Driver: Manufacturer = <strong>HP</strong> → Printers სიაში მოძებნე <strong>HP LaserJet Pro M15a</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>თუ სიაში არ ჩანს → <span class="kb">Have Disk…</span> → Browse → HP-ის ვებ-საიტიდან გადმოწერილი INF ფაილი მიუთითე</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ან გამოიყენე <strong>HP Universal Print Driver PCL6</strong> (hp.com/go/upd-დან ჩამოტვირთე) → <span class="kb">Finish</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>HP პრინტერის დამატება IP-ით</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Print Management → Printers → Right-click → <strong>Add Printer…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Network Printer Install: <strong>Add a new printer using an existing port</strong> → Dropdown: <strong>Create a new port</strong> → Type: <strong>Standard TCP/IP Port</strong> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Hostname or IP address: <code>192.168.131.150</code> → Port Name ავტომატურად შეივსება: <code>IP_192.168.131.150</code> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Additional port information: ნუ შეცვლი → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Driver: <strong>HP LaserJet Pro M15a</strong> (ან HP UPD PCL6) → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Printer Name: <code>HP-LaserJet-M15a</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>✅ <strong>Share this printer</strong> → Share Name: <code>HP-LaserJet-M15a</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Location: <code>Main Office</code> → <span class="kb">Next</span> → <span class="kb">Finish</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>ტესტური ბეჭდვა — გადამოწმება</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Printers სიაში: <code>HP-LaserJet-M15a</code> → Right-click → <strong>Print Test Page</strong></span></div>
+      </div>
+      <div class="result">✅ ტესტური გვერდი გავიდა — Print Server 100% სწორად კონფიგურირებულია</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Print Management → Drivers: x64 და x86 ჩანს; Printers: HP-LaserJet-M15a ჩანს Ready სტატუსით</div>
+
+  </div>
+</div>
+
+
+<!-- ── S2-7 ── -->
+<div class="step" id="s2-7">
+  <div class="step-hd">
+    <div class="step-icon ic2">07</div>
+    <div class="step-hd-info">
+      <h3>Hyper-V — ვირტუალიზაციის სერვერი</h3>
+      <div class="step-hd-meta">Server Manager → Add Roles → Hyper-V → virtmgmt.msc</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-info"><span class="note-ico">💡</span><strong>Hyper-V</strong> — Microsoft-ის ვირტუალიზაციის ტექნოლოგია. ერთ ფიზიკურ სერვერზე შეიძლება ბევრი <strong>ვირტუალური მანქანა</strong> ეშვებოდეს ერთდროულად. ეს ის ტექნოლოგიაა, რომელსაც VMware-ს ალტერნატივად იყენებენ.</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">1</div><strong>Hyper-V Role-ის ინსტალაცია</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Server Manager → Add Roles and Features → <span class="kb">Next</span> → <span class="kb">Next</span> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Server Roles-ში: ✅ <strong>Hyper-V</strong> → Pop-up → <span class="kb">Add Features</span> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Virtual Switches</strong> ეტაპი: მონიშნე <strong>ფიზიკური ქსელის ბარათი</strong> (Network Adapter სიაში) → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><strong>Migration</strong>: <span class="kb">Next</span> → <strong>Default Stores</strong>: <span class="kb">Next</span> → <span class="kb">Install</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>⏳ ინსტალაცია → სერვერი <strong>ავტომატურად გადაიტვირთება</strong></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">2</div><strong>Hyper-V Manager გახსნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span><code>Win + R</code> → <code>virtmgmt.msc</code> → <span class="kb">OK</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">3</div><strong>Virtual Switch Manager — 3 Switch</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Hyper-V Manager → მარჯვნივ Actions სვეტი → <strong>Virtual Switch Manager…</strong></span></div>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead><tr><th>Switch ტიპი</th><th>სახელი</th><th>კავშირი</th><th>გამოყენება</th></tr></thead>
+          <tbody>
+            <tr><td><strong>External</strong></td><td><code>External-vSwitch</code></td><td>ფიზიკური NIC</td><td>VM → ინტერნეტი / LAN</td></tr>
+            <tr><td><strong>Internal</strong></td><td><code>Internal-vSwitch</code></td><td>Host ↔ VM</td><td>VM ↔ Host კომუნიკაცია</td></tr>
+            <tr><td><strong>Private</strong></td><td><code>Private-vSwitch</code></td><td>VM ↔ VM</td><td>იზოლირებული VM-VM ქსელი</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>ყოველი Switch-ისთვის: <strong>New virtual network switch</strong> → ტიპი → <span class="kb">Create Virtual Switch</span> → სახელი → <span class="kb">OK</span></p>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">4</div><strong>VM Paths კონფიგურაცია (D: დისკზე)</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Hyper-V Manager → სერვერის სახელი → Right-click → <strong>Hyper-V Settings…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Virtual Hard Disks: <code>D:\HyperV\VHD\</code> (Browse-ით შექმენი)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Virtual Machines: <code>D:\HyperV\VM\</code> → <span class="kb">OK</span></span></div>
+      </div>
+      <div class="note n-warn"><span class="note-ico">⚠️</span>C: დისკზე VM-ების შენახვა ცუდი პრაქტიკაა — D: დისკი გამოიყენე!</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn2">5</div><strong>ახალი Virtual Machine-ის შექმნა (ტესტი)</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Actions → <strong>New → Virtual Machine…</strong> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>Test-VM</code> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Generation: <strong>Generation 2</strong> (Windows Server 2022 და Win10/11-სთვის) → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Startup Memory: <code>2048</code> MB → ✅ <strong>Use Dynamic Memory</strong> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Connection: <code>External-vSwitch</code> → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Create VHD: Path: <code>D:\HyperV\VHD\</code> → Size: <code>40</code> GB → <span class="kb">Next</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Install Options: <strong>Install an OS from a bootable image file</strong> → Browse → ISO ფაილი → <span class="kb">Next</span> → <span class="kb">Finish</span></span></div>
+      </div>
+      <div class="result">✅ Hyper-V სრულად გამართულია. VM ჩანს Hyper-V Manager-ში.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: Hyper-V Manager — Virtual Switches ჩანს (External, Internal, Private); Test-VM ჩამოთვლილია</div>
+
+  </div>
+</div>
+
+
+<!--===========================================
+    PART 3
+============================================-->
+<div class="part-header" id="part3">
+  <div class="part-pill pp3">ნაწილი 3</div>
+  <h2>FTP, Teachers OU, Drive Map, Quota, Folder Redirection</h2>
+</div>
+
+
+<!-- ── S3-1 ── -->
+<div class="step" id="s3-1">
+  <div class="step-hd">
+    <div class="step-icon ic3">01</div>
+    <div class="step-hd-info">
+      <h3>FTP OU — FTP_Users, ბექა ჩეჩელაშვილი, თენგიზ გაბრავა, IIS FTP სერვერი</h3>
+      <div class="step-hd-meta">AD + IIS Manager + FTP Site</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>OU FTP შექმნა AD-ში</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>AD Users and Computers → დომეინზე Right-click → <strong>New → Organizational Unit</strong> → Name: <code>FTP</code> → OK</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>FTP_Users ჯგუფის შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>FTP OU → Right-click → <strong>New → Group</strong></span></div>
+      </div>
+      <div class="tbl"><table><thead><tr><th>ველი</th><th>მნიშვნელობა</th></tr></thead><tbody>
+        <tr><td>Group name</td><td><code>FTP_Users</code></td></tr>
+        <tr><td>Group scope</td><td><strong>Global</strong></td></tr>
+        <tr><td>Group type</td><td><strong>Security</strong></td></tr>
+      </tbody></table></div>
+      <div class="actions"><div class="act"><span class="act-arrow">→</span><span><span class="kb">OK</span></span></div></div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">3</div><strong>ორი მომხმარებლის შექმნა</strong></div>
+      <p>FTP OU → Right-click → New → User:</p>
+      <div class="tbl"><table><thead><tr><th>სახელი</th><th>Last name</th><th>User logon name</th></tr></thead><tbody>
+        <tr><td>Beka (ბექა)</td><td>Chechelashvili</td><td><code>b.chechelashvili</code></td></tr>
+        <tr><td>Tengiz (თენგიზი)</td><td>Gabrava</td><td><code>t.gabrava</code></td></tr>
+      </tbody></table></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>ორივე User-ი FTP_Users ჯგუფში: <code>FTP_Users</code> → Double-click → Members → <span class="kb">Add…</span> → b.chechelashvili, t.gabrava → OK</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">4</div><strong>IIS + FTP Server Role ინსტალაცია</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Server Manager → Add Roles → <strong>Web Server (IIS)</strong> → Add Features</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Role Services ეტაპი: ✅ <strong>FTP Server</strong> → ✅ <strong>FTP Service</strong> → Install</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>FTP Root-ისთვის საქაღალდე: <code>D:\FTP_root</code> (File Explorer-ში შექმენი)</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">5</div><strong>FTP Site-ის შექმნა IIS Manager-ში</strong></div>
+      <div class="np">
+        <span class="np-seg">Server Manager → Tools</span><span class="np-arr">›</span>
+        <span class="np-fin">Internet Information Services (IIS) Manager</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>IIS Manager-ში: <strong>Sites</strong> → Right-click → <strong>Add FTP Site…</strong></span></div>
+      </div>
+      <div class="tbl"><table><thead><tr><th>ეტაპი</th><th>ველი</th><th>მნიშვნელობა</th></tr></thead><tbody>
+        <tr><td rowspan="2">Site Info</td><td>FTP site name</td><td><code>FTP_Server</code></td></tr>
+        <tr><td>Physical path</td><td><code>D:\FTP_root</code> (Browse-ით)</td></tr>
+        <tr><td rowspan="3">Binding &amp; SSL</td><td>IP address</td><td>სერვერის IP ან All Unassigned</td></tr>
+        <tr><td>Port</td><td><code>21</code></td></tr>
+        <tr><td>SSL</td><td><strong>No SSL</strong></td></tr>
+        <tr><td>Authentication</td><td>Basic</td><td>✅ <strong>Enabled</strong></td></tr>
+        <tr><td rowspan="2">Authorization</td><td>Allow access to</td><td><strong>Specified roles or user groups</strong></td></tr>
+        <tr><td>Group name</td><td><code>FTP_Users</code></td></tr>
+        <tr><td>Permissions</td><td>—</td><td>✅ <strong>Read</strong> ✅ <strong>Write</strong></td></tr>
+      </tbody></table></div>
+      <div class="actions"><div class="act"><span class="act-arrow">→</span><span><span class="kb">Finish</span></span></div></div>
+      <div class="result">✅ FTP-ზე მხოლოდ FTP_Users (ბექა და თენგიზი) შეიძლება შევიდეს</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: IIS Manager — FTP_Server Site ჩანს Started; AD-ში FTP OU ჩანს FTP_Users ჯგუფით და ორი User-ით</div>
+
+  </div>
+</div>
+
+
+<!-- ── S3-2 ── -->
+<div class="step" id="s3-2">
+  <div class="step-hd">
+    <div class="step-icon ic3">02</div>
+    <div class="step-hd-info">
+      <h3>Teachers OU — Linux, Windows ჯგუფები — გიორგი, ალექსი</h3>
+      <div class="step-hd-meta">Active Directory Users and Computers</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>Teachers OU შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>AD → დომეინი → Right-click → New → Organizational Unit → Name: <code>Teachers</code> → OK</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>ორი ჯგუფის შექმნა</strong></div>
+      <div class="tbl"><table><thead><tr><th>Group Name</th><th>Scope</th><th>Type</th></tr></thead><tbody>
+        <tr><td><code>Linux</code></td><td>Global</td><td>Security</td></tr>
+        <tr><td><code>Windows</code></td><td>Global</td><td>Security</td></tr>
+      </tbody></table></div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">3</div><strong>მომხმარებლების შექმნა და ჯგუფში გაწევრიანება</strong></div>
+      <div class="tbl"><table><thead><tr><th>სახელი</th><th>Logon</th><th>ჯგუფი</th></tr></thead><tbody>
+        <tr><td>გიორგი გოგოლაძე</td><td><code>g.gogoladze</code></td><td><code>Linux</code></td></tr>
+        <tr><td>ალექსი ბეროზაშვილი</td><td><code>a.berozashvili</code></td><td><code>Windows</code></td></tr>
+      </tbody></table></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>User → Right-click → <strong>Add to a group…</strong> → ჩაწერე ჯგუფის სახელი → Check Names → OK</span></div>
+      </div>
+    </div>
+
+    <div class="scr">📸 სქრინი: AD → Teachers OU: Linux, Windows ჯგუფები; g.gogoladze → Linux; a.berozashvili → Windows</div>
+
+  </div>
+</div>
+
+
+<!-- ── S3-3 ── -->
+<div class="step" id="s3-3">
+  <div class="step-hd">
+    <div class="step-icon ic3">03</div>
+    <div class="step-hd-info">
+      <h3>Drive Map GPO — გიორგი: L: დისკი, ალექსი: W: დისკი</h3>
+      <div class="step-hd-meta">Group Policy Management → DriveMap_Teachers GPO</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>Share საქაღალდეების შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>File Explorer: <code>D:\Shares\LinuxShare</code> და <code>D:\Shares\WindowsShare</code> საქაღალდეები შექმენი</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>LinuxShare → Properties → Sharing → Advanced Sharing → ✅ Share → Name: <code>LinuxShare</code> → OK</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>WindowsShare → Properties → Sharing → Advanced Sharing → ✅ Share → Name: <code>WindowsShare</code> → OK</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>DriveMap_Teachers GPO შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Group Policy Management → Teachers OU → Right-click → <strong>Create a GPO in this domain, and Link it here…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>DriveMap_Teachers</code> → OK → GPO → Right-click → <strong>Edit…</strong></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">3</div><strong>L: Drive — გიორგი გოგოლაძე</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Preferences</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Settings</span><span class="np-arr">›</span>
+        <span class="np-fin">Drive Maps</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Right-click → <strong>New → Mapped Drive</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Action: <strong>Create</strong> | Location: <code>\\SERVERNAME\LinuxShare</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Drive Letter: <strong>L:</strong> | ✅ Reconnect</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>ჩანართი <strong>Common</strong> → ✅ <strong>Item-level targeting</strong> → <span class="kb">Targeting…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>New Item → <strong>Security Group</strong> → Group: <code>Linux</code> → Check Names → OK → OK</span></div>
+      </div>
+      <div class="note n-info"><span class="note-ico">💡</span><strong>Item-level targeting</strong> უზრუნველყოფს, რომ <strong>მხოლოდ Linux ჯგუფის</strong> წევრებს (= გიორგი) გამოუჩნდეს L: დისკი. სხვა User-ებს ეს Drive Map-ი ვერ დაინახავს.</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">4</div><strong>W: Drive — ალექსი ბეროზაშვილი</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Drive Maps → Right-click → <strong>New → Mapped Drive</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Action: Create | Location: <code>\\SERVERNAME\WindowsShare</code> | Drive Letter: <strong>W:</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Common → ✅ Item-level targeting → Targeting… → New Item → Security Group → <code>Windows</code> → OK → OK</span></div>
+      </div>
+      <div class="result">✅ გიორგი შევა → ნახავს L: დისკს. ალექსი შევა → ნახავს W: დისკს. სხვა არავინ ხედავს ამ Drives-ს.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: GPO Editor → Drive Maps (L: და W: ჩანს); Item-level targeting კონფიგურირებული</div>
+
+  </div>
+</div>
+
+
+<!-- ── S3-4 ── -->
+<div class="step" id="s3-4">
+  <div class="step-hd">
+    <div class="step-icon ic3">04</div>
+    <div class="step-hd-info">
+      <h3>Quota — გიორგი: max 10GB (L:), ალექსი: max 5GB (W:)</h3>
+      <div class="step-hd-meta">FSRM → Quota Management → Quotas</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>FSRM გახსნა</strong></div>
+      <div class="np"><span class="np-seg">Server Manager → Tools</span><span class="np-arr">›</span><span class="np-fin">File Server Resource Manager</span></div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>გიორგი — 10GB Quota</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Quota Management → <strong>Quotas</strong> → Right-click → <strong>Create Quota…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Quota path: <code>D:\Shares\LinuxShare</code> (Browse-ით)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>✅ <strong>Define custom quota properties</strong> → <span class="kb">Custom Properties…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Space limit: ჩაწერე <code>10</code> → Dropdown: <strong>GB</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Quota type: <strong>Hard quota</strong> (Hard = ზემოთ ვერ ჩაწერს!) → <span class="kb">OK</span> → <span class="kb">Create</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">3</div><strong>ალექსი — 5GB Quota</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Quotas → Right-click → <strong>Create Quota…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Path: <code>D:\Shares\WindowsShare</code> → Custom → Limit: <code>5</code> GB → Hard quota → <span class="kb">Create</span></span></div>
+      </div>
+      <div class="result">✅ გიორგი L:-ზე 10GB-ზე მეტს ვერ ჩაწერს. ალექსი W:-ზე 5GB-ზე მეტს ვერ ჩაწერს.</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: FSRM Quotas — LinuxShare (10 GB Hard) და WindowsShare (5 GB Hard) ჩანს</div>
+
+  </div>
+</div>
+
+
+<!-- ── S3-5 ── -->
+<div class="step" id="s3-5">
+  <div class="step-hd">
+    <div class="step-icon ic3">05</div>
+    <div class="step-hd-info">
+      <h3>File Screening — ფაილების ტიპების შეზღუდვა</h3>
+      <div class="step-hd-meta">FSRM → File Screening Management → File Screens</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-info"><span class="note-ico">💡</span><strong>File Screening</strong> — FSRM-ის ფუნქცია, რომელიც გარკვეული ტიპის ფაილების ატვირთვას <strong>ბლოკავს</strong>. Active Screening = მყისიერი ბლოკი (ფაილი ვერ გადაცოპირდება).</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>გიორგი — ვიდეო და აუდიო ბლოკი (L: დისკი)</strong></div>
+      <div class="np"><span class="np-seg">FSRM</span><span class="np-arr">›</span><span class="np-seg">File Screening Management</span><span class="np-arr">›</span><span class="np-fin">File Screens</span></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Right-click → <strong>Create File Screen…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>File screen path: <code>D:\Shares\LinuxShare</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>✅ <strong>Define custom file screen properties</strong> → <span class="kb">Custom Properties…</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Screening type: <strong>Active screening</strong> (ეს ბლოკავს!)</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>File groups სიაში: ✅ <strong>Audio and Video Files</strong> → <span class="kb">OK</span> → <span class="kb">Create</span></span></div>
+      </div>
+      <div class="note n-ok"><span class="note-ico">✅</span>ბლოკდება: *.mp3, *.mp4, *.avi, *.wav, *.mkv, *.wmv, *.flac და სხვა ვიდეო/აუდიო ფორმატები</div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>ალექსი — docx, xlsx, txt, mp3, mp4, gif ბლოკი (W: დისკი)</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>File Screens → Right-click → <strong>Create File Screen…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Path: <code>D:\Shares\WindowsShare</code> → Define custom → Active screening</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>File groups-ში: <span class="kb">Create…</span> → Group name: <code>Custom-Block-Alex</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Files to include ველში ჩაწერე და <span class="kb">Add</span> დააჭირე ყოველს: <code>*.docx</code>, <code>*.xlsx</code>, <code>*.txt</code>, <code>*.mp3</code>, <code>*.mp4</code>, <code>*.gif</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">OK</span> → File groups სიაში ✅ <strong>Custom-Block-Alex</strong> → <span class="kb">OK</span> → <span class="kb">Create</span></span></div>
+      </div>
+    </div>
+
+    <div class="scr">📸 სქრინი: FSRM File Screens — LinuxShare (Audio and Video) და WindowsShare (Custom-Block-Alex) ჩანს</div>
+
+  </div>
+</div>
+
+
+<!-- ── S3-6 ── -->
+<div class="step" id="s3-6">
+  <div class="step-hd">
+    <div class="step-icon ic3">06</div>
+    <div class="step-hd-info">
+      <h3>Folder Redirection — Desktop + Documents → All Data სერვერზე</h3>
+      <div class="step-hd-meta">Group Policy Management → Folder_Redirection GPO</div>
+    </div>
+    <div class="scr-pill">📸 სქრინი</div>
+  </div>
+  <div class="step-body">
+
+    <div class="note n-info"><span class="note-ico">💡</span><strong>Folder Redirection</strong> — User-ი Desktop-ზე ფაილს ინახავს და ფიქრობს რომ ლოკალურ კომპიუტერზე ინახება. სინამდვილეში ფაილი <strong>სერვერზე ინახება</strong> All Data საქაღალდეში. User-ი ვერ ამჩნევს სხვაობას.</div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">1</div><strong>All Data საქაღალდის შექმნა და გაზიარება</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>File Explorer: <code>D:\</code> → New Folder → <code>All Data</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>All Data → Properties → Sharing → Advanced Sharing → ✅ Share this folder → Name: <code>All Data</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Permissions → Add <code>Authenticated Users</code> → ✅ <strong>Full Control</strong> → Remove <code>Everyone</code> → OK</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Security ჩანართი → Edit → Add <code>Authenticated Users</code> → ✅ <strong>Modify</strong> → Apply → OK</span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">2</div><strong>Folder_Redirection GPO შექმნა</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Group Policy Management → <strong>შენს დომეინზე</strong> Right-click → <strong>Create a GPO in this domain, and Link it here…</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Name: <code>Folder_Redirection</code> → OK → GPO → Right-click → <strong>Edit…</strong></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">3</div><strong>Desktop-ის გადამისამართება</strong></div>
+      <div class="np">
+        <span class="np-seg">User Configuration</span><span class="np-arr">›</span>
+        <span class="np-seg">Policies</span><span class="np-arr">›</span>
+        <span class="np-seg">Windows Settings</span><span class="np-arr">›</span>
+        <span class="np-seg">Folder Redirection</span><span class="np-arr">›</span>
+        <span class="np-fin">Desktop</span>
+      </div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Desktop → Right-click → <strong>Properties</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Setting: <strong>Basic – Redirect everyone's folder to the same location</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Target folder location: <strong>Redirect to the following location</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Root Path: <code>\\SERVERNAME\All Data</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Preview: ნახავ <code>\\SERVERNAME\All Data\%username%\Desktop</code> → <span class="kb">Apply</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">4</div><strong>Documents-ის გადამისამართება</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>Folder Redirection → <strong>Documents</strong> → Right-click → Properties</span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Setting: <strong>Basic</strong> → Root Path: <code>\\SERVERNAME\All Data</code></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>Settings ჩანართი: ✅ <strong>Grant the user exclusive rights to Documents</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>✅ <strong>Move the contents of Documents to the new location</strong></span></div>
+        <div class="act"><span class="act-arrow">→</span><span><span class="kb">Apply</span> → <span class="kb">OK</span></span></div>
+      </div>
+    </div>
+
+    <div class="ms">
+      <div class="ms-title"><div class="ms-num mn3">5</div><strong>GPO Force Update</strong></div>
+      <div class="actions">
+        <div class="act"><span class="act-arrow">→</span><span>PowerShell (Admin): <span class="cmd-block">gpupdate /force</span></span></div>
+        <div class="act"><span class="act-arrow">→</span><span>გადამოწმება: User შევიდეს, Desktop-ზე ფაილი შეინახოს → სერვერზე <code>D:\All Data\username\Desktop\</code> ჩანდეს</span></div>
+      </div>
+      <div class="result">✅ ყველა User-ის Desktop + Documents ფაილი ახლა ავტომატურად სერვერზე ინახება <code>D:\All Data\</code>-ში</div>
+    </div>
+
+    <div class="scr">📸 სქრინი: GPO Editor — Desktop და Documents Redirection კონფიგურირებული; სერვერზე All Data საქაღალდე ჩანს User-ების ქვე-საქაღალდეებით</div>
+
+  </div>
+</div>
+
+
+<!-- FINAL -->
+<div style="background:linear-gradient(135deg,#ecfdf5 0%,#eff6ff 100%);border:2px solid #a7f3d0;border-radius:20px;padding:36px 40px;margin-top:48px;text-align:center;box-shadow:0 4px 20px rgba(16,185,129,0.12);">
+  <div style="font-size:40px;margin-bottom:14px">🎉</div>
+  <h2 style="font-size:24px;font-weight:800;color:#0f172a;margin-bottom:10px">გილოცავ — ყველა ნაბიჯი დასრულდა!</h2>
+  <p style="color:#475569;font-size:14.5px;max-width:520px;margin:0 auto 24px;line-height:1.65;">Windows Server 2022 სრულად კონფიგურირებული გაქვს. AD DS, DHCP, DNS, File Server, GPO, Print Server, Hyper-V, FTP, Teachers OU, Folder Redirection — ყველაფერი!</p>
+  <div style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;">
+    <div style="background:white;border:1.5px solid #a7f3d0;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;color:#065f46;">✅ ნაწილი 1 — ინსტალაცია</div>
+    <div style="background:white;border:1.5px solid #a7f3d0;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;color:#065f46;">✅ ნაწილი 2 — კონფიგურაცია</div>
+    <div style="background:white;border:1.5px solid #a7f3d0;border-radius:10px;padding:10px 20px;font-size:13px;font-weight:700;color:#065f46;">✅ ნაწილი 3 — FTP & Teachers</div>
+  </div>
+</div>
+
+
+</main>
+</div>
+
+<script>
+// Progress bar
+window.addEventListener('scroll', () => {
+  const d = document.documentElement;
+  document.getElementById('pbar').style.width =
+    (d.scrollTop / (d.scrollHeight - d.clientHeight) * 100) + '%';
+});
+
+// Checkbox toggle
+function toggle(el) { el.classList.toggle('done'); }
+
+// Active sidebar link
+const steps = document.querySelectorAll('.step[id]');
+const links = document.querySelectorAll('.sb-link');
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const a = document.querySelector(`.sb-link[href="#${e.target.id}"]`);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+steps.forEach(s => obs.observe(s));
+</script>
+</body>
+</html>
